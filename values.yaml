@@ -1,0 +1,72 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/fluid-pub/controlplane-ee
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+nameOverride: "fluid-controlplane"
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 4000
+
+gatewayApi:
+  enabled: true
+  # Existing Gateway resource that should expose the controlplane HTTPRoute.
+  gateway:
+    name: fluid-gateway
+    namespace: ""
+    sectionName: http
+  hostnames:
+    - controlplane.example.com
+  matches:
+    - path:
+        type: PathPrefix
+        value: /
+
+# Chart does not manage Secret objects.
+# Reference pre-existing secrets from the release namespace (envFrom).
+# They must provide DATABASE_URL, SECRET_KEY_BASE, PHX_HOST, PORT.
+envFromSecrets: []
+
+resources: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+podAnnotations: {}
+
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+extraEnv: []
+
+jobs:
+  setup:
+    ttlSecondsAfterFinished: 600
+    backoffLimit: 2
+    activeDeadlineSeconds: 1800
+  migrate:
+    ttlSecondsAfterFinished: 600
+    backoffLimit: 2
+    activeDeadlineSeconds: 900
