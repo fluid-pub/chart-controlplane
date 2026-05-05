@@ -1,0 +1,25 @@
+# Runs when this chart tree is the root of the GitHub repository (e.g. fluid-pub/chart-controlplane).
+
+name: Helm chart CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm lint
+        run: helm lint .

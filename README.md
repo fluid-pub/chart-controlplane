@@ -1,5 +1,9 @@
 # Helm chart — controlplane
 
+In the **`fluid`** monorepo this chart lives under `code/charts/fluid-controlplane/`; standalone Git (**`fluid-pub/chart-controlplane`**) uses the same layout at the repository root.
+
+**Release (standalone repo)** — **`helm lint`** runs on PRs and `main` / `develop`; pushing a semver tag **without `v`** triggers an OCI publish to **`oci://ghcr.io/<GitHub-owner>/fluid-controlplane`** only when the tag equals **`version`** in `Chart.yaml`. Example install: **`helm pull oci://ghcr.io/fluid-pub/fluid-controlplane --version 0.1.0`** (substitute chart version).
+
 Application-only chart: **no** bundled PostgreSQL and **no Secret management** in the chart.
 Provide credentials via pre-existing Kubernetes Secret(s), referenced in `envFromSecrets`.
 
