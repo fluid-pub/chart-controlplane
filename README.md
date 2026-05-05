@@ -1,2 +1,36 @@
-# chart-controlplane
-Helm chart fluid-controlplane — Fluid control plane on Kubernetes
+# Helm chart — controlplane
+
+Application-only chart: **no** bundled PostgreSQL and **no Secret management** in the chart.
+Provide credentials via pre-existing Kubernetes Secret(s), referenced in `envFromSecrets`.
+
+By default, traffic exposure uses **Gateway API** (`gatewayApi.enabled: true`, `HTTPRoute`).
+
+## Hooks
+
+| Helm hook     | Container command                                  |
+|---------------|----------------------------------------------------|
+| `pre-install` | `/app/bin/setup` (`ecto.create` + migrate + seeds) |
+| `pre-upgrade` | `/app/bin/migrate` (migrations only)               |
+
+Use the **same** image tag as the Deployment (`values.yaml` → `image.repository` / `image.tag`).
+
+## Required Secret keys (production)
+
+Create one or more Secrets in the release namespace, then list them in `envFromSecrets`.
+Minimum keys consumed by `runtime.exs`:
+
+- `DATABASE_URL`
+- `SECRET_KEY_BASE`
+- `PHX_HOST`
+- `PORT` (typically `4000`)
+
+Optional keys depend on enabled features (LLM, RAG, enrollment, etc.) — see `code/controlplane/config/runtime.exs`.
+
+## Probes
+
+Defaults:
+
+- **Liveness** — `GET /health/live` (no database check).
+- **Readiness** — `GET /health/ready` (checks database connectivity).
+
+Override paths under `livenessProbe` / `readinessProbe` in values if needed.
