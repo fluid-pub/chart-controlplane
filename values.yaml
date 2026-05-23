@@ -27,10 +27,16 @@ gatewayApi:
     - path:
         type: PathPrefix
         value: /
+  # Execution agent WebSocket: consistent hash on Authorization (Bearer connection token).
+  # Enabled automatically when replicaCount > 1; set enabled: false to opt out.
+  agentAffinity:
+    routePath: /v1/agents/websocket
+    consistentHashHeader: authorization
 
 # Chart does not manage Secret objects.
 # Reference pre-existing secrets from the release namespace (envFrom).
-# They must provide DATABASE_URL, SECRET_KEY_BASE, PHX_HOST, PORT.
+# They must provide DATABASE_URL, SECRET_KEY_BASE, CONTROLPLANE_VAULT_SECRET,
+# ENROLLMENT_TOKEN_FINGERPRINT_SECRET, PHX_HOST, PORT.
 envFromSecrets: []
 
 resources: {}

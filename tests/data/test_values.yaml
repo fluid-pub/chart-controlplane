@@ -1,0 +1,46 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/fluid-pub/controlplane-ee
+  tag: "0.2.2"
+  pullPolicy: IfNotPresent
+
+nameOverride: fluid-controlplane
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 4000
+
+gatewayApi:
+  enabled: true
+  gateway:
+    name: fluid-gateway
+    namespace: gateway-system
+    sectionName: https
+  hostnames:
+    - cp.example.com
+  matches:
+    - path:
+        type: PathPrefix
+        value: /
+  agentAffinity:
+    routePath: /v1/agents/websocket
+    consistentHashHeader: authorization
+
+envFromSecrets:
+  - controlplane-secrets
+
+extraEnv:
+  - name: EXTRA_FLAG
+    value: "1"
+
+jobs:
+  setup:
+    ttlSecondsAfterFinished: 600
+    backoffLimit: 2
+    activeDeadlineSeconds: 1800
+  migrate:
+    ttlSecondsAfterFinished: 600
+    backoffLimit: 2
+    activeDeadlineSeconds: 900

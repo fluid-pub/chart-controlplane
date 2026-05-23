@@ -1,5 +1,3 @@
-# Runs when this chart tree is the root of the GitHub repository (e.g. fluid-pub/chart-controlplane).
-
 name: Helm chart CI
 
 on:
@@ -23,3 +21,17 @@ jobs:
 
       - name: Helm lint
         run: helm lint .
+
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Install helm-unittest plugin
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest --version v0.6.3 --verify=false
+
+      - name: Helm unittest
+        run: helm unittest .

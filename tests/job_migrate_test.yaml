@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: job-migrate
+templates:
+  - job-migrate.yaml
+tests:
+  - it: should render pre-upgrade migrate Job
+    values:
+      - ./data/test_values.yaml
+    asserts:
+      - isKind:
+          of: Job
+      - matchRegex:
+          path: metadata.name
+          pattern: -migrate$
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: pre-upgrade
+      - equal:
+          path: spec.template.spec.containers[0].command[0]
+          value: /app/bin/migrate
