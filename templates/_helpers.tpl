@@ -32,3 +32,15 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/name: {{ include "controlplane.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Agent WebSocket affinity: dedicated HTTPRoute + BackendTrafficPolicy (consistent hash).
+Enabled when gatewayApi.enabled and replicaCount > 1 unless gatewayApi.agentAffinity.enabled is set explicitly.
+*/}}
+{{- define "controlplane.agentAffinity.enabled" -}}
+{{- if .Values.gatewayApi.enabled -}}
+{{- if kindIs "bool" .Values.gatewayApi.agentAffinity.enabled -}}
+{{- if .Values.gatewayApi.agentAffinity.enabled -}}true{{- end -}}
+{{- else if gt (int .Values.replicaCount) 1 -}}true{{- end -}}
+{{- end -}}
+{{- end -}}

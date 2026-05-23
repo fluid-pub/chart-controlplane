@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: httproute-agents
+templates:
+  - httproute-agents.yaml
+tests:
+  - it: should not render agents HTTPRoute when replicaCount is 1
+    values:
+      - ./data/test_values.yaml
+    set:
+      replicaCount: 1
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render agents HTTPRoute when explicitly disabled
+    values:
+      - ./data/test_values.yaml
+    set:
+      gatewayApi.agentAffinity.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render agents HTTPRoute when gatewayApi is disabled
+    values:
+      - ./data/test_values.yaml
+    set:
+      gatewayApi.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render agents HTTPRoute when affinity is enabled
+    values:
+      - ./data/test_values.yaml
+    asserts:
+      - isKind:
+          of: HTTPRoute
+      - matchRegex:
+          path: metadata.name
+          pattern: -agents$
+      - equal:
+          path: spec.rules[0].matches[0].path.value
+          value: /v1/agents/websocket
+      - equal:
+          path: spec.rules[0].backendRefs[0].port
+          value: 4000
+
+  - it: should honor custom agent affinity route path
+    values:
+      - ./data/test_values.yaml
+    set:
+      gatewayApi.agentAffinity.routePath: /custom/ws
+    asserts:
+      - equal:
+          path: spec.rules[0].matches[0].path.value
+          value: /custom/ws

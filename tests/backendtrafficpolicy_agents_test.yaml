@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: backendtrafficpolicy-agents
+templates:
+  - backendtrafficpolicy-agents.yaml
+tests:
+  - it: should not render BackendTrafficPolicy when replicaCount is 1
+    values:
+      - ./data/test_values.yaml
+    set:
+      replicaCount: 1
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render BackendTrafficPolicy with consistent hash on authorization
+    values:
+      - ./data/test_values.yaml
+    asserts:
+      - isKind:
+          of: BackendTrafficPolicy
+      - equal:
+          path: spec.targetRefs[0].kind
+          value: HTTPRoute
+      - equal:
+          path: spec.loadBalancer.type
+          value: ConsistentHash
+      - equal:
+          path: spec.loadBalancer.consistentHash.header.name
+          value: authorization
+
+  - it: should honor custom consistent hash header
+    values:
+      - ./data/test_values.yaml
+    set:
+      gatewayApi.agentAffinity.consistentHashHeader: x-sticky-key
+    asserts:
+      - equal:
+          path: spec.loadBalancer.consistentHash.header.name
+          value: x-sticky-key

@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: job-setup
+templates:
+  - job-setup.yaml
+tests:
+  - it: should render pre-install setup Job
+    values:
+      - ./data/test_values.yaml
+    asserts:
+      - isKind:
+          of: Job
+      - matchRegex:
+          path: metadata.name
+          pattern: -setup$
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: pre-install
+      - equal:
+          path: spec.template.spec.containers[0].command[0]
+          value: /app/bin/setup
+      - equal:
+          path: spec.ttlSecondsAfterFinished
+          value: 600

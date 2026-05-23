@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: deployment
+templates:
+  - deployment.yaml
+tests:
+  - it: should render Deployment with default labels and image
+    values:
+      - ./data/test_values.yaml
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: fluid-controlplane
+      - equal:
+          path: spec.replicas
+          value: 2
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/fluid-pub/controlplane-ee:0.2.2
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 4000
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].name
+          value: http
+
+  - it: should mount envFrom when envFromSecrets is set
+    values:
+      - ./data/test_values.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: controlplane-secrets
+
+  - it: should include extraEnv entries
+    values:
+      - ./data/test_values.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: EXTRA_FLAG
+            value: "1"
+
+  - it: should use fullnameOverride for metadata name
+    values:
+      - ./data/test_values.yaml
+    set:
+      fullnameOverride: custom-cp
+    asserts:
+      - equal:
+          path: metadata.name
+          value: custom-cp
