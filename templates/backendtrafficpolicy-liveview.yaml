@@ -20,4 +20,5 @@ spec:
         ttl: {{ $lv.cookieTtl | default "86400s" | quote }}
         attributes:
           SameSite: {{ $lv.cookieSameSite | default "Lax" | quote }}
+          Path: {{ $lv.cookiePath | default "/" | quote }}
 {{- end }}

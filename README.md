@@ -39,6 +39,8 @@ When `replicaCount` is greater than 1 and `gatewayApi.enabled` is true, the char
 
 Envoy sends `Set-Cookie` on the first browser response when the cookie is absent; the browser attaches it on later requests, including **`/live/websocket`** upgrades, so HTTP and Phoenix LiveView land on the **same control plane pod** while that pod stays healthy.
 
+By default the chart sets cookie attribute **`Path=/`** (`gatewayApi.liveViewAffinity.cookiePath`) so the browser keeps a **single** affinity cookie for the whole app. Without it, Envoy Gateway may emit one cookie per request path (e.g. `/dashboard` vs `/live`), which breaks stickiness across HTML and the LiveView WebSocket ([envoyproxy/gateway#8580](https://github.com/envoyproxy/gateway/issues/8580)). Confirm your Envoy Gateway version honours `cookie.attributes.Path` in `BackendTrafficPolicy`.
+
 This cookie is **not** the Phoenix session cookie (`COOKIE_SIGNING_SALT` / `_controlplane_key` are unrelated).
 
 Opt out: `gatewayApi.liveViewAffinity.enabled: false`. Force on with a single replica: `gatewayApi.liveViewAffinity.enabled: true`.
