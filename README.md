@@ -7,10 +7,10 @@ In the **`fluid`** monorepo this chart lives under `code/charts/fluid-controlpla
 **Install / pull from GHCR** — Helm OCI on GitHub stores the chart under a path that repeats the chart **`name:`** (see the package page `fluid-controlplane/fluid-controlplane`). Use **`--version`** with the full OCI prefix, for example:
 
 ```text
-helm pull oci://ghcr.io/fluid-pub/fluid-controlplane/fluid-controlplane --version 0.2.0
+helm pull oci://ghcr.io/fluid-pub/fluid-controlplane/fluid-controlplane --version 0.3.0
 ```
 
-or the equivalent tag form **`oci://ghcr.io/fluid-pub/fluid-controlplane/fluid-controlplane:0.2.0`**. The shorter reference **`oci://ghcr.io/fluid-pub/fluid-controlplane`** (without the second **`fluid-controlplane`**) does **not** resolve with **`helm pull` / `helm install`** against this registry layout.
+or the equivalent tag form **`oci://ghcr.io/fluid-pub/fluid-controlplane/fluid-controlplane:0.3.0`**. The shorter reference **`oci://ghcr.io/fluid-pub/fluid-controlplane`** (without the second **`fluid-controlplane`**) does **not** resolve with **`helm pull` / `helm install`** against this registry layout.
 
 Application-only chart: **no** bundled PostgreSQL and **no Secret management** in the chart.
 Provide credentials via pre-existing Kubernetes Secret(s), referenced in `envFromSecrets`.
