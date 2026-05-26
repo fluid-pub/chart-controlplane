@@ -32,11 +32,17 @@ gatewayApi:
   agentAffinity:
     routePath: /v1/agents/websocket
     consistentHashHeader: authorization
+  # Browser / LiveView: Envoy sets this cookie on first response for consistent hashing to one pod (HTML + /live websocket).
+  # Not the Phoenix session cookie; name is infra-only (see README). Enabled when replicaCount > 1 unless disabled explicitly.
+  liveViewAffinity:
+    cookieName: fluid_controlplane_liveview
+    cookieTtl: 86400s
+    cookieSameSite: Lax
 
 # Chart does not manage Secret objects.
 # Reference pre-existing secrets from the release namespace (envFrom).
-# They must provide DATABASE_URL, SECRET_KEY_BASE, CONTROLPLANE_VAULT_SECRET,
-# ENROLLMENT_TOKEN_FINGERPRINT_SECRET, PHX_HOST, PORT.
+# They must provide DATABASE_URL, SECRET_KEY_BASE, COOKIE_SIGNING_SALT,
+# CONTROLPLANE_VAULT_SECRET, ENROLLMENT_TOKEN_FINGERPRINT_SECRET, PHX_HOST, PORT.
 envFromSecrets: []
 
 resources: {}

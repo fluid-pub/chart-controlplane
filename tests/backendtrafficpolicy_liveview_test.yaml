@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: backendtrafficpolicy-liveview
+templates:
+  - backendtrafficpolicy-liveview.yaml
+tests:
+  - it: should not render BackendTrafficPolicy when replicaCount is 1
+    values:
+      - ./data/test_values.yaml
+    set:
+      replicaCount: 1
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render BackendTrafficPolicy with cookie consistent hash on main HTTPRoute
+    values:
+      - ./data/test_values.yaml
+    asserts:
+      - isKind:
+          of: BackendTrafficPolicy
+      - matchRegex:
+          path: metadata.name
+          pattern: -liveview-affinity$
+      - equal:
+          path: spec.targetRefs[0].kind
+          value: HTTPRoute
+      - matchRegex:
+          path: spec.targetRefs[0].name
+          pattern: fluid-controlplane$
+      - equal:
+          path: spec.loadBalancer.type
+          value: ConsistentHash
+      - equal:
+          path: spec.loadBalancer.consistentHash.type
+          value: Cookie
+      - equal:
+          path: spec.loadBalancer.consistentHash.cookie.name
+          value: fluid_controlplane_liveview
+      - equal:
+          path: spec.loadBalancer.consistentHash.cookie.ttl
+          value: 86400s
+      - equal:
+          path: spec.loadBalancer.consistentHash.cookie.attributes.SameSite
+          value: Lax
+
+  - it: should honor custom cookie name and ttl
+    values:
+      - ./data/test_values.yaml
+    set:
+      gatewayApi.liveViewAffinity.cookieName: my_sticky
+      gatewayApi.liveViewAffinity.cookieTtl: 3600s
+      gatewayApi.liveViewAffinity.cookieSameSite: Strict
+    asserts:
+      - equal:
+          path: spec.loadBalancer.consistentHash.cookie.name
+          value: my_sticky
+      - equal:
+          path: spec.loadBalancer.consistentHash.cookie.ttl
+          value: 3600s
+      - equal:
+          path: spec.loadBalancer.consistentHash.cookie.attributes.SameSite
+          value: Strict
+
+  - it: should not render when liveViewAffinity explicitly disabled with multiple replicas
+    values:
+      - ./data/test_values.yaml
+    set:
+      gatewayApi.liveViewAffinity.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render when liveViewAffinity forced on with single replica
+    values:
+      - ./data/test_values.yaml
+    set:
+      replicaCount: 1
+      gatewayApi.liveViewAffinity.enabled: true
+    asserts:
+      - isKind:
+          of: BackendTrafficPolicy

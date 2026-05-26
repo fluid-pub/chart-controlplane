@@ -33,6 +33,24 @@ kubectl get httproute,backendtrafficpolicy -n <namespace>
 
 Do not rely on Service `sessionAffinity: ClientIP` alone for agent tunnels (unreliable behind proxies).
 
+## Multi-replica LiveView / dashboard (Gateway cookie affinity)
+
+When `replicaCount` is greater than 1 and `gatewayApi.enabled` is true, the chart attaches a **BackendTrafficPolicy** to the **main** HTTPRoute (`path: /`). Envoy Gateway uses **consistent hash** on a **routing-only** cookie (default name **`fluid_controlplane_liveview`**, configurable under `gatewayApi.liveViewAffinity`).
+
+Envoy sends `Set-Cookie` on the first browser response when the cookie is absent; the browser attaches it on later requests, including **`/live/websocket`** upgrades, so HTTP and Phoenix LiveView land on the **same control plane pod** while that pod stays healthy.
+
+This cookie is **not** the Phoenix session cookie (`COOKIE_SIGNING_SALT` / `_controlplane_key` are unrelated).
+
+Opt out: `gatewayApi.liveViewAffinity.enabled: false`. Force on with a single replica: `gatewayApi.liveViewAffinity.enabled: true`.
+
+Verify after deploy (same resource check as agents):
+
+```bash
+kubectl get httproute,backendtrafficpolicy -n <namespace>
+```
+
+See also [Envoy Gateway — consistent hash cookie](https://gateway.envoyproxy.io/docs/tasks/traffic/load-balancing/).
+
 ## Chart tests
 
 Install [helm-unittest](https://github.com/helm-unittest/helm-unittest) and run from this directory:
@@ -60,6 +78,7 @@ Minimum keys consumed by `runtime.exs`:
 
 - `DATABASE_URL`
 - `SECRET_KEY_BASE`
+- `COOKIE_SIGNING_SALT`
 - `CONTROLPLANE_VAULT_SECRET`
 - `ENROLLMENT_TOKEN_FINGERPRINT_SECRET`
 - `PHX_HOST`

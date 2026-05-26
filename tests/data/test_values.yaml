@@ -27,6 +27,10 @@ gatewayApi:
   agentAffinity:
     routePath: /v1/agents/websocket
     consistentHashHeader: authorization
+  liveViewAffinity:
+    cookieName: fluid_controlplane_liveview
+    cookieTtl: 86400s
+    cookieSameSite: Lax
 
 envFromSecrets:
   - controlplane-secrets

@@ -44,3 +44,16 @@ Enabled when gatewayApi.enabled and replicaCount > 1 unless gatewayApi.agentAffi
 {{- else if gt (int .Values.replicaCount) 1 -}}true{{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+LiveView / dashboard: BackendTrafficPolicy on the main HTTPRoute with consistent hash on an Envoy-managed cookie.
+Enabled when gatewayApi.enabled and replicaCount > 1 unless gatewayApi.liveViewAffinity.enabled is set explicitly.
+*/}}
+{{- define "controlplane.liveViewAffinity.enabled" -}}
+{{- if .Values.gatewayApi.enabled -}}
+{{- $lv := .Values.gatewayApi.liveViewAffinity | default dict -}}
+{{- if kindIs "bool" $lv.enabled -}}
+{{- if $lv.enabled -}}true{{- end -}}
+{{- else if gt (int .Values.replicaCount) 1 -}}true{{- end -}}
+{{- end -}}
+{{- end -}}
