@@ -38,6 +38,8 @@ gatewayApi:
     cookieName: fluid_controlplane_liveview
     cookieTtl: 86400s
     cookieSameSite: Lax
+    # Site-wide Path so Envoy does not emit one affinity cookie per request path (HTML vs /live).
+    cookiePath: /
 
 # Chart does not manage Secret objects.
 # Reference pre-existing secrets from the release namespace (envFrom).

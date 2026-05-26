@@ -42,6 +42,9 @@ tests:
       - equal:
           path: spec.loadBalancer.consistentHash.cookie.attributes.SameSite
           value: Lax
+      - equal:
+          path: spec.loadBalancer.consistentHash.cookie.attributes.Path
+          value: /
 
   - it: should honor custom cookie name and ttl
     values:
@@ -60,6 +63,29 @@ tests:
       - equal:
           path: spec.loadBalancer.consistentHash.cookie.attributes.SameSite
           value: Strict
+      - equal:
+          path: spec.loadBalancer.consistentHash.cookie.attributes.Path
+          value: /
+
+  - it: should honor custom cookie path
+    values:
+      - ./data/test_values.yaml
+    set:
+      gatewayApi.liveViewAffinity.cookiePath: /custom-root
+    asserts:
+      - equal:
+          path: spec.loadBalancer.consistentHash.cookie.attributes.Path
+          value: /custom-root
+
+  - it: should default cookie path to slash when cookiePath is omitted
+    values:
+      - ./data/test_values.yaml
+    set:
+      gatewayApi.liveViewAffinity.cookiePath: null
+    asserts:
+      - equal:
+          path: spec.loadBalancer.consistentHash.cookie.attributes.Path
+          value: /
 
   - it: should not render when liveViewAffinity explicitly disabled with multiple replicas
     values:
