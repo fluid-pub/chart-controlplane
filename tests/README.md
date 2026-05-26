@@ -31,6 +31,7 @@ helm unittest tests/httproute_agents_test.yaml
 | `httproute_test.yaml` | `httproute.yaml` |
 | `httproute_agents_test.yaml` | `httproute-agents.yaml` |
 | `backendtrafficpolicy_agents_test.yaml` | `backendtrafficpolicy-agents.yaml` |
+| `backendtrafficpolicy_liveview_test.yaml` | `backendtrafficpolicy-liveview.yaml` |
 | `job_setup_test.yaml` | `job-setup.yaml` |
 | `job_migrate_test.yaml` | `job-migrate.yaml` |
 
